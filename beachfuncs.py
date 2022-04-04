@@ -73,12 +73,10 @@ arrowImg        = pygame.image.load('images/arrow.png')
 arrowImg        = pygame.transform.scale(arrowImg, (8*widgetScale,8*widgetScale))
 weatherIcons    = pygame.image.load('images/weather_icons.png')
 
-timeNow         = timeSinceConfigRefresh = timeSinceForecastRefresh = timeSinceTideRefresh = getEpochTime()
+
 timezone, timeoffset = getCurrentTimeZone()
 
-RenderCount     = 0
-pauseCount      = 0
-loop_count      = 0
 beachData       = []
 kiteData        = []
 icons           = []
+dayText         = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']

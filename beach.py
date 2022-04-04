@@ -67,49 +67,33 @@ class Beach (Tide, Weather):
             seperator = ' '
         timenow = convertEpochTime (timenow)
     
-        
         return f'{timenow.tm_hour:02d}{seperator}{timenow.tm_min:02d} {self.name}'
         
-
-    def renderBeachStatusPG (self):
-        if self.kiteable:
-            return f'Kite {deltaToString(self.kiteforecast.time - getEpochTime())}',f'{self.kite.make} {self.kite.model} {self.kite.size}m'
-        else:
-            return 'No Kiting',''
-    
     def renderCurrentWeatherPG (self):
         return self.weather.renderCurrentWeatherPG()
     
     def renderSummary (self, font, width, currentTimezone, currentOffset):
         self.nameSurface = font.render (self.renderBeachPG(currentTimezone, currentOffset), True, (255,255,0))  
 
-        kitable, kite = self.renderBeachStatusPG()
+        if self.kiteable:
+            statusTxt = f'Kite {deltaToString(self.kiteforecast.time - getEpochTime())}'
+        else:
+            statusTxt = 'No Kiting'
 
-        self.statusSurface = font.render (kitable, True, (255,255,0))
-        self.statusKiteSurface = font.render (kitable + kite, True, (255,255,0))
+        #f'Kite {deltaToString(self.kiteforecast.time - getEpochTime())}'
+        self.statusSurface = font.render (statusTxt, True, (255,255,0))
 
         self.nameRect = self.nameSurface.get_rect()
         self.statusRect =  self.statusSurface.get_rect()
-        self.statusKiteRect = self.statusKiteSurface.get_rect()
-
-        if kite != '':
-            self.scrollStatus = True
-            self.scrollSpeed = 5
-            self.scrollPause = 0
-            self.scrollPos = 0
-        else:
-            self.scrollStatus = False
 
     def blitSummary (self, surface, scale, width, row):
         surface.blit(self.nameSurface, (0,row)) 
+        surface.blit(self.statusSurface, (width - self.statusRect.width - (1*scale), row)) 
 
-
-        if self.scrollStatus:
-            surface.blit(self.kiteforecast.surfaceForecast, (0,row + rowHeight))
-            clipRect = (self.nameRect.width + 10 ,row,width,self.statusRect.height + row)
-            #surface.set_clip(clipRect)
-
-            surface.blit(self.statusKiteSurface, (width - (self.statusRect.width + 10) - self.scrollPos, row))
+        if self.kiteable and self.scrollStatus:
+            clipRect = (0 ,row + rowHeight,width,self.kiteforecast.surfaceForecastRect.height + row)
+            surface.set_clip(clipRect)
+            surface.blit(self.kiteforecast.surfaceForecast, (0 - self.scrollPos, row + rowHeight))
 
             if self.scrollPos == 0 and self.scrollPause < 50:
                 self.scrollPause += 1
@@ -117,19 +101,17 @@ class Beach (Tide, Weather):
             else:
                 self.scrollPause = 0
                 self.scrollPos += self.scrollSpeed
-                if self.scrollPos >= self.statusKiteRect.width + self.statusRect.width:
+                if self.scrollPos >= self.kiteforecast.surfaceForecastRect.width:
                     self.scrollPos = 0
                     
-
-            #surface.set_clip(None)
-        else:
-            surface.blit(self.statusSurface, (width - self.statusRect.width -10, (row))) 
+            surface.set_clip(None)
 
     def checkKitingConditions(self, kiteData):
-
+        self.scrollStatus = False
         for forecast in self.weather.forecast:
             # Mark wheter a forecast is kitable
-
+            forecast.kiteable = False
+           
             #Check whether it's day or night
             if forecast.pod == 'n':
                 continue
@@ -147,19 +129,21 @@ class Beach (Tide, Weather):
             # Rain?
             # Wind Speed
             forecast.kiteable = True
-            print (f'{forecast.Winddeg} ({self.wind_direction[0]},{self.wind_direction[1]})')
+            self.scrollStatus = True
+            self.scrollSpeed = 3
+            self.scrollPause = 0
+            self.scrollPos = 0
 
-            #
+        #else:
+        #    print (f'{forecast.Winddeg} ({self.wind_direction[0]},{self.wind_direction[1]})')
 
     def renderForecast (self, icons):
-
         self.forecastSurface.fill(background)
         nameStr = fontSmall.render (self.name, True, (255,255,0)) 
         nameRect = nameStr.get_rect()
         epochNow = getEpochTime()
         tileWidth = int (widgetWidth / 8)
  
-
         for numdays in range (0,forecastDays):
 
             timeNow = epochToTS (epochNow)
@@ -212,15 +196,9 @@ class Beach (Tide, Weather):
                 windDirRect        = windDirSurface.get_rect(midtop=(tile.centerx,windRect.bottom+(1*widgetScale)))
                 self.forecastSurface.blit (windDirSurface, windDirRect)
 
-                rainStr         = f'{forecast.rain}'
-                rainSurface     = fontSmaller.render (rainStr, True, (255,255,0)) 
-
                 count += 1
 
             epochNow += 86400
-        #segments:
-        #Time, Icon, Wind (gust), direction,  rain, temperature
-        
         return
 
     def displayForecast (self, surface, day=0):
@@ -243,5 +221,10 @@ class Beach (Tide, Weather):
                 self.timetokite = kiteforecast.time - timeNow
                 self.kiteable = True
                 self.kiteforecast = kiteforecast
+
+                self.kiteforecast.forecastText = f'Kiteable on {dayText [kiteforecast.timeTS.tm_wday]} at {kiteforecast.timeTS.tm_hour:02d}:{kiteforecast.timeTS.tm_min:02d}, Forecast: {kiteforecast.Description}, {windDirectionFromDegrees(kiteforecast.Winddeg)} wind, {int(kiteforecast.Windspeed)}knts ({int(kiteforecast.Windgust)}knt gusts), {kiteforecast.pop}% chance of rain. Use {kite.make} {kite.model} {int(kite.size)}m'
+                self.kiteforecast.surfaceForecast = fontSmall.render (self.kiteforecast.forecastText, True, (255,255,0))
+                self.kiteforecast.surfaceForecastRect = self.kiteforecast.surfaceForecast.get_rect()
+
                 if DEBUG:
                     print (f' {self.name} kiteable on {kite.getText()} at {kiteforecast.getText()} ')

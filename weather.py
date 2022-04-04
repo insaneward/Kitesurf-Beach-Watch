@@ -194,7 +194,6 @@ class Weather:
             forecast.printForecast(name)
 
     def getDaysForecast (self, dayTS):
-        print (dayTS)
         for forecast in self.forecast:
             forecastTS = time.gmtime(forecast.time)
             if dayTS.tm_yday == forecastTS.tm_yday:
@@ -217,9 +216,6 @@ class Weather:
                 if (forecast.time - timeNow > 0):
                     #Should check the high tide forcast
                     #render a forecast line so we don't need to do it again, and get rect
-                    forecast.forecastText = f'{windDirectionFromDegrees(forecast.Winddeg)} {int(forecast.Windspeed)} {int(forecast.Windgust)} {epochToStr(forecast.time)} {forecast.pop}%'
-                    forecast.surfaceForecast = fontSmall.render (forecast.forecastText, True, (255,255,0))
-                    forecast.surfaceForecastRect = forecast.surfaceForecast.get_rect()
                     return forecast
 
         return None
