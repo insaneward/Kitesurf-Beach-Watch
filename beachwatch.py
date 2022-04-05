@@ -141,7 +141,8 @@ for count in range (0,len(configData['beaches'])):
 beachData.sort(key=sortKiteable)
 timeNow = timeSinceScreenChange = timeSinceConfigRefresh = timeSinceForecastRefresh = timeSinceTideRefresh = getEpochTime()
 
-currentRect = (0,0,widgetWidth, widgetHeight)
+currentRect = pygame.Rect((0,0),(widgetWidth, widgetHeight))
+targetRect = currentRect.copy()
 
 while True:
     pygame.display.update() 
@@ -154,13 +155,16 @@ while True:
 
     clock.tick(25)
 
-    if(timeNow - timeSinceScreenChange >= 5):
+    if(timeNow - timeSinceScreenChange >= 5) and (currentRect == targetRect):
         print ("Change Screen")
         currentScreen += 1
         currentScreen %= len(screenSequence)
         x = int(screenSequence[currentScreen] / screenMatrix[1])
         y = screenSequence[currentScreen] % screenMatrix[1]
-        currentRect = (x * widgetWidth, y * widgetHeight, widgetWidth, widgetHeight)
+        targetRect = pygame.Rect((x * widgetWidth, y * widgetHeight), (widgetWidth, widgetHeight))
+
+            
+        transitioning = True
         
 
         # Sequence: 
@@ -174,6 +178,16 @@ while True:
 
 
         timeSinceScreenChange = timeNow
+    
+    if targetRect != currentRect:
+        
+        if targetRect.left < currentRect.left or targetRect.top < currentRect.top:
+            currentRect = targetRect.copy()
+        elif targetRect.centerx == currentRect.centerx:
+            currentRect.top += 8
+        else:
+            currentRect.left += 16
+
 
     if(timeNow - timeSinceConfigRefresh >= configData["configRefreshTime"]):
         configData2, iconData2 = loadConfig()

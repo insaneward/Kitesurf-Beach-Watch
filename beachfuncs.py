@@ -49,10 +49,10 @@ def windDirectionFromDegrees(degrees):
 #Globals
 
 DEMODATA = False
-DEBUG    = True
+DEBUG    = False
 
 forecastDays = 2
-widgetScale = 2
+widgetScale = 4
 widgetWidth = 256 * widgetScale
 widgetHeight = 64 * widgetScale
 
