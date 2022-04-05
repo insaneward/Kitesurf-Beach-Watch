@@ -105,8 +105,6 @@ class Weather:
         self.weather_url = "https://api.openweathermap.org/data/2.5/onecall?exclude=minutely&lat=" + str(lat) + "&lon=" + str(long) + "&appid=" + api
         self.weather5_url = "https://api.openweathermap.org/data/2.5/forecast?lat=" + str(lat) + "&lon=" + str(long) + "&appid=" + api
 
-#https://api.openweathermap.org/data/2.5/onecall?exclude=minutely&lat=-3.06378&lon=40.17283&appid=5060ac833dc83e4e2886f55a8a89dd04
-
     def getWeatherForecast (self, name):
         filename = f'data/{name} - weather.json'
         if DEMODATA:

@@ -239,7 +239,7 @@ while True:
         beachData[row].blitSummary (canvas, widgetScale, widgetWidth, widgetHeight + (row * rowHeight * 2))
 
     timeNow = getEpochTime ()
-    screen.blit (canvas, (0,0))
+    screen.blit (canvas, (0,0), area=currentRect)
 
     if DEBUG:
         #Draw middle line
