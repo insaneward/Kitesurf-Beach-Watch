@@ -2,7 +2,7 @@
 from asyncio.base_subprocess import WriteSubprocessPipeProto
 from re import X
 from tkinter import Canvas
-from turtle import setundobuffer
+from turtle import screensize, setundobuffer
 
 import json
 
@@ -89,6 +89,13 @@ configData, iconData = loadConfig()
 numBeaches = len(configData['beaches'])
 screenMatrix = (forecastDays+1,max(numBeaches, 1 + (int(numBeaches/2) + numBeaches %2)))
 
+    
+screenSequence = []
+for loop in range(numBeaches):
+    screenSequence.extend(list(range (0,(int(numBeaches/2) + numBeaches %2))))
+    screenSequence.extend(list(range(forecastDays)))
+
+
 #Canvas
 #    TIME                , FORECAST BEACH 1
 #    KITEABLE BEACH 1/2  , FORECAST BEACH 2
@@ -148,6 +155,17 @@ while True:
     clock.tick(25)
 
     if(timeNow - timeSinceScreenChange >= 20):
+        print ("Change Screen")
+        # Sequence: 
+        # Cycle through main screens
+        # Cycle through forecast for beach
+        # Cycle through main screen
+        # Cycle through next forecasts
+        
+        #stage: 1 main screen
+        #stage: 2 forecastDay
+
+
         timeSinceScreenChange = timeNow
 
     if(timeNow - timeSinceConfigRefresh >= configData["configRefreshTime"]):
