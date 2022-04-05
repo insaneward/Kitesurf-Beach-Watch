@@ -92,23 +92,23 @@ screenMatrix = (forecastDays+1,max(numBeaches, 1 + (int(numBeaches/2) + numBeach
     
 screenSequence = []
 for loop in range(numBeaches):
-    screenSequence.extend(list(range (0,(int(numBeaches/2) + numBeaches %2))))
-    screenSequence.extend(list(range(forecastDays)))
+    screenSequence.extend(list(range (0,1+(int(numBeaches/2) + numBeaches %2))))
+    screenSequence.extend(list(range(screenMatrix[1] + loop,(forecastDays+1) * screenMatrix[1] + loop,screenMatrix[1])))
 
 
 #Canvas
-#    TIME                , FORECAST BEACH 1
-#    KITEABLE BEACH 1/2  , FORECAST BEACH 2
-#    KITEABlE BEACH 3/4  , FORECAST BEACH 3
-#    KITEABlE BEACH 5/6  , FORECAST BEACH 4
-#    KITEABlE BEACH 7/8  , FORECAST BEACH 5
-#                          FORECAST BEACH 6
-#                          FORECAST BEACH 7
-#                          FORECAST BEACH 8
+#    0.  TIME                , 8.  FORECAST BEACH 1
+#    1.  KITEABLE BEACH 1/2  , 9.  FORECAST BEACH 2
+#    2.  KITEABlE BEACH 3/4  , 10. FORECAST BEACH 3
+#    3.  KITEABlE BEACH 5/6  , 11. FORECAST BEACH 4
+#    4.  KITEABlE BEACH 7/8  , 12. FORECAST BEACH 5
+#    5.                        13. FORECAST BEACH 6
+#    6.                        14. FORECAST BEACH 7
+#    7.                        15. FORECAST BEACH 8
 
 
 canvas = pygame.Surface((widgetWidth * screenMatrix[0], widgetHeight * screenMatrix[1]))
-canvasScreen = 0
+currentScreen = 0
 
 if DEBUG:
     screen = pygame.display.set_mode((widgetWidth * screenMatrix[0], widgetHeight * screenMatrix[1]))
@@ -154,8 +154,15 @@ while True:
 
     clock.tick(25)
 
-    if(timeNow - timeSinceScreenChange >= 20):
+    if(timeNow - timeSinceScreenChange >= 5):
         print ("Change Screen")
+        currentScreen += 1
+        currentScreen %= len(screenSequence)
+        x = int(screenSequence[currentScreen] / screenMatrix[1])
+        y = screenSequence[currentScreen] % screenMatrix[1]
+        currentRect = (x * widgetWidth, y * widgetHeight, widgetWidth, widgetHeight)
+        
+
         # Sequence: 
         # Cycle through main screens
         # Cycle through forecast for beach
